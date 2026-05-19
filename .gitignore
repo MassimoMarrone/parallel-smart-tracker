@@ -13,5 +13,5 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Backup / old versions
-000-*
+# Backup / old versions (solo script Python)
+000-*.py
