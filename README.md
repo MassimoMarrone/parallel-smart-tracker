@@ -1,12 +1,164 @@
 # Parallel Smart Tracker
 
+> 🇮🇹 [Italiano](#italiano) · 🇬🇧 [English](#english)
+
+---
+
+## Italiano
+
+Applicazione desktop per il tracking automatico di cellule in video di microscopia, che combina algoritmi di segmentazione Level Set con calcolo parallelo per un'analisi rapida e accurata.
+
+Realizzato con **PySide6** · **scikit-image** · **OpenCV** · **PyInstaller**
+
+---
+
+### Come funziona
+
+Il tracciamento manuale di cellule in video time-lapse può richiedere ore di lavoro per pochi minuti di filmato. Smart Tracker automatizza il processo:
+
+1. Carica una cartella di frame `.tif` (o qualsiasi formato immagine standard)
+2. Pre-elabora ogni frame (filtro mediano → Top-Hat → CLAHE)
+3. Segmenta le cellule con un algoritmo Level Set (Chan-Vese di default)
+4. Usa il risultato di ogni frame come punto di partenza per il successivo — il contorno "segue" la cellula nel tempo
+5. Elabora tutti i frame in parallelo sfruttando tutti i core della CPU disponibili
+
+Il risultato è una maschera binaria per ogni frame che indica esattamente dove si trova la cellula.
+
+---
+
+### Algoritmi
+
+#### Chan-Vese (default)
+Level Set basato su regioni che minimizza la differenza tra l'intensità dei pixel e la media dentro/fuori il contorno. Non richiede bordi netti — ideale per cellule sfocate o a basso contrasto.
+
+#### GAC (Geodesic Active Contours)
+Level Set basato sui bordi che segue i gradienti di intensità. Più veloce ma richiede contorni più definiti.
+
+#### LBF (Local Binary Fitting)
+Modello regionale adattivo locale. Gestisce cellule con intensità interna non uniforme (es. nucleo visibile) ma è il più lento dei tre.
+
+| | GAC | Chan-Vese | LBF |
+|---|---|---|---|
+| Tipo | Edge-based | Region globale | Region locale |
+| Cellule sfocate | ✗ | ✓ | ✓ |
+| Velocità (100 frame) | ~12 s | ~24 s | ~82 s |
+| Accuratezza | Bassa | Alta | Alta |
+
+**Chan-Vese + pre-elaborazione CLAHE è la configurazione consigliata** per dati tipici di microscopia a fluorescenza.
+
+---
+
+### Funzionalità
+
+| Scheda | Descrizione |
+|--------|-------------|
+| **Tracking** | Anteprima live frame per frame con overlay. Parametri configurabili: iterazioni, smoothing, lambda. Modalità seriale o parallela. |
+| **Confronto** | Confronto affiancato di GAC vs LBF sullo stesso dataset, con pannelli parametri indipendenti e grafico speedup. |
+| **Speedup** | Benchmark seriale vs parallelo con grafico dei tempi per numero di core. |
+| **Info** | Documentazione degli algoritmi e guida all'uso. |
+
+La sidebar è collassabile. Tutti i pannelli parametri sono collassabili.
+
+---
+
+### Installazione (sviluppo locale)
+
+```bash
+# 1. Clona la repo
+git clone https://github.com/massimomarrone/parallel-smart-tracker.git
+cd parallel-smart-tracker
+
+# 2. Crea un ambiente virtuale pulito
+python3.11 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+
+# 3. Installa le dipendenze
+pip install PySide6 numpy tifffile scipy scikit-image opencv-python
+```
+
+```bash
+# Avvia l'applicazione
+python smart_tracker_pyside6.py
+```
+
+---
+
+### Build applicazione standalone
+
+#### macOS (.app)
+```bash
+pip install pyinstaller
+pyinstaller smart_tracker.spec --clean
+# Output: dist/Smart Tracker.app
+```
+
+#### Windows (.exe)
+```bash
+pip install pyinstaller
+pyinstaller smart_tracker_win.spec --clean
+# Output: dist/SmartTracker/SmartTracker.exe
+```
+
+> **Consiglio:** esegui sempre il build in un ambiente virtuale pulito (non Anaconda) per mantenere il bundle leggero (~300 MB invece di 1+ GB).
+
+---
+
+### CI/CD — GitHub Actions
+
+Ad ogni push su `main` vengono compilate automaticamente entrambe le piattaforme in parallelo:
+
+- `build-macos` → `Smart_Tracker_macOS.zip` (contiene `Smart Tracker.app`)
+- `build-windows` → cartella `SmartTracker/` (portabile, senza installer)
+
+Scarica gli artefatti dalla scheda **Actions** di questa repository al termine di ogni build.
+
+> Il virtual environment **non** è incluso nella repo. GitHub Actions installa tutte le dipendenze da zero su ogni runner tramite `pip install`.
+
+---
+
+### Struttura del progetto
+
+```
+.
+├── smart_tracker_pyside6.py      # Applicazione principale (UI PySide6 + algoritmi)
+├── smart_tracker.spec            # Spec PyInstaller — macOS
+├── smart_tracker_win.spec        # Spec PyInstaller — Windows
+└── .github/
+    └── workflows/
+        └── build.yml             # CI build per macOS + Windows
+```
+
+---
+
+### Stack tecnologico
+
+- **PySide6** — framework UI Qt6
+- **scikit-image** — implementazioni Level Set Chan-Vese e GAC
+- **OpenCV** — pre-elaborazione immagini (filtro mediano, morfologia Top-Hat, CLAHE)
+- **SciPy** — utilità signal e ndimage
+- **tifffile** — caricamento TIFF multi-frame
+- **concurrent.futures** — `ProcessPoolExecutor` per l'elaborazione parallela dei frame
+- **PyInstaller** — packaging standalone per macOS e Windows
+
+---
+
+### Autore
+
+**Massimo Marrone** — Progetto di Calcolo Scientifico
+
+---
+
+---
+
+## English
+
 A desktop application for automated cell tracking in microscopy videos, combining Level Set segmentation algorithms with parallel computing for fast, accurate analysis.
 
 Built with **PySide6** · **scikit-image** · **OpenCV** · **PyInstaller**
 
 ---
 
-## What it does
+### What it does
 
 Biologists manually tracing cells in time-lapse microscopy videos can spend hours on just a few minutes of footage. Smart Tracker automates this:
 
@@ -20,15 +172,15 @@ The result is a clean binary mask per frame, showing exactly where each cell is.
 
 ---
 
-## Algorithms
+### Algorithms
 
-### Chan-Vese (default)
+#### Chan-Vese (default)
 Region-based Level Set that minimises the difference between pixel intensity and the mean inside/outside the contour. No sharp edges required — ideal for blurry or low-contrast cells.
 
-### GAC (Geodesic Active Contours)
+#### GAC (Geodesic Active Contours)
 Edge-based Level Set that follows intensity gradients. Faster but needs cleaner borders.
 
-### LBF (Local Binary Fitting)
+#### LBF (Local Binary Fitting)
 Locally adaptive region model. Handles cells with uneven internal intensity (e.g. visible nucleus) but is the slowest of the three.
 
 | | GAC | Chan-Vese | LBF |
@@ -42,7 +194,7 @@ Locally adaptive region model. Handles cells with uneven internal intensity (e.g
 
 ---
 
-## Features
+### Features
 
 | Tab | Description |
 |-----|-------------|
@@ -51,11 +203,11 @@ Locally adaptive region model. Handles cells with uneven internal intensity (e.g
 | **Speedup** | Benchmark serial vs parallel processing and plot the wall-clock time per core count. |
 | **Info** | Algorithm documentation and usage guide. |
 
-The sidebar is collapsible — click the arrow to reclaim screen space. All parameter panels are also collapsible.
+The sidebar is collapsible. All parameter panels are also collapsible.
 
 ---
 
-## Installation (local development)
+### Installation (local development)
 
 ```bash
 # 1. Clone
@@ -77,16 +229,16 @@ python smart_tracker_pyside6.py
 
 ---
 
-## Building a standalone app
+### Building a standalone app
 
-### macOS (.app)
+#### macOS (.app)
 ```bash
 pip install pyinstaller
 pyinstaller smart_tracker.spec --clean
 # Output: dist/Smart Tracker.app
 ```
 
-### Windows (.exe)
+#### Windows (.exe)
 ```bash
 pip install pyinstaller
 pyinstaller smart_tracker_win.spec --clean
@@ -97,7 +249,7 @@ pyinstaller smart_tracker_win.spec --clean
 
 ---
 
-## CI/CD — GitHub Actions
+### CI/CD — GitHub Actions
 
 Every push to `main` automatically builds both platforms in parallel:
 
@@ -110,7 +262,7 @@ Download the artifacts from the **Actions** tab of this repository after each bu
 
 ---
 
-## Project structure
+### Project structure
 
 ```
 .
@@ -124,7 +276,7 @@ Download the artifacts from the **Actions** tab of this repository after each bu
 
 ---
 
-## Tech stack
+### Tech stack
 
 - **PySide6** — Qt6 UI framework
 - **scikit-image** — Chan-Vese and GAC Level Set implementations
@@ -136,6 +288,6 @@ Download the artifacts from the **Actions** tab of this repository after each bu
 
 ---
 
-## Author
+### Author
 
 **Massimo Marrone** — Calcolo Scientifico project
