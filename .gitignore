@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# PyInstaller output
+build/
+dist/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# macOS
+.DS_Store
+
+# Backup / old versions
+000-*
