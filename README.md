@@ -85,7 +85,7 @@ python3.11 -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 
 # 3. Installa le dipendenze
-pip install PySide6 numpy tifffile scipy scikit-image opencv-python
+pip install -r requirements.txt
 ```
 
 ```bash
@@ -243,7 +243,7 @@ python3.11 -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 
 # 3. Install dependencies
-pip install PySide6 numpy tifffile scipy scikit-image opencv-python
+pip install -r requirements.txt
 ```
 
 ```bash
