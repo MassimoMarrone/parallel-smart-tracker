@@ -2,6 +2,9 @@
 
 > 🇮🇹 [Italiano](#italiano) · 🇬🇧 [English](#english)
 
+[![Download macOS](https://img.shields.io/badge/Download-macOS%20(.app)-informational?logo=apple)](https://github.com/MassimoMarrone/parallel-smart-tracker/releases/latest/download/Smart_Tracker_macOS.zip)
+[![Download Windows](https://img.shields.io/badge/Download-Windows%20(.exe)-informational?logo=windows)](https://github.com/MassimoMarrone/parallel-smart-tracker/releases/latest/download/Smart_Tracker_Windows.zip)
+
 ---
 
 ## Italiano
