@@ -12,6 +12,18 @@ Realizzato con **PySide6** · **scikit-image** · **OpenCV** · **PyInstaller**
 
 ---
 
+### Screenshot
+
+| Tracking | Confronto GAC vs LBF |
+|:---:|:---:|
+| ![Tracking](assets/screenshot_tracking.png) | ![Confronto](assets/screenshot_confronto.png) |
+
+| Speedup parallelo | Output Chan-Vese |
+|:---:|:---:|
+| ![Speedup](assets/screenshot_speedup.png) | ![Chan-Vese](assets/frame_chan_vese.png) |
+
+---
+
 ### Come funziona
 
 Il tracciamento manuale di cellule in video time-lapse può richiedere ore di lavoro per pochi minuti di filmato. Smart Tracker automatizza il processo:
@@ -155,6 +167,18 @@ Scarica gli artefatti dalla scheda **Actions** di questa repository al termine d
 A desktop application for automated cell tracking in microscopy videos, combining Level Set segmentation algorithms with parallel computing for fast, accurate analysis.
 
 Built with **PySide6** · **scikit-image** · **OpenCV** · **PyInstaller**
+
+---
+
+### Screenshots
+
+| Tracking | Comparison GAC vs LBF |
+|:---:|:---:|
+| ![Tracking](assets/screenshot_tracking.png) | ![Comparison](assets/screenshot_confronto.png) |
+
+| Parallel Speedup | Chan-Vese Output |
+|:---:|:---:|
+| ![Speedup](assets/screenshot_speedup.png) | ![Chan-Vese](assets/frame_chan_vese.png) |
 
 ---
 
