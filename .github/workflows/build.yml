@@ -58,8 +58,56 @@ jobs:
       - name: Build .exe
         run: pyinstaller smart_tracker_win.spec --clean
 
+      - name: Zip .exe for upload
+        run: Compress-Archive -Path dist\SmartTracker\* -DestinationPath dist\Smart_Tracker_Windows.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Smart-Tracker-Windows
-          path: dist/SmartTracker/
+          path: dist/Smart_Tracker_Windows.zip
+
+  release:
+    name: Create Release
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Smart-Tracker-macOS
+          path: release/
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Smart-Tracker-Windows
+          path: release/
+
+      - name: Delete existing latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --repo ${{ github.repository }} --yes 2>/dev/null || true
+          git -c protocol.version=2 ls-remote --tags origin | grep -q "refs/tags/latest" && \
+            gh api -X DELETE /repos/${{ github.repository }}/git/refs/tags/latest || true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Smart Tracker — Latest Build"
+          body: |
+            Ultima build automatica da `main`.
+
+            **Download:**
+            - `Smart_Tracker_macOS.zip` — macOS (.app, richiede macOS 12+)
+            - `Smart_Tracker_Windows.zip` — Windows (portabile, nessun installer)
+
+            ---
+            *Build generata automaticamente da GitHub Actions.*
+          files: |
+            release/Smart_Tracker_macOS.zip
+            release/Smart_Tracker_Windows.zip
+          make_latest: true
