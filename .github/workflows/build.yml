@@ -71,6 +71,8 @@ jobs:
     name: Create Release
     needs: [build-macos, build-windows]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Download macOS artifact
