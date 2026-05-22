@@ -115,7 +115,16 @@ def clean_mask(mask, min_cell_size=700, max_hole_size=1500):
     cleaned = morphology.remove_small_objects(opened, min_size=min_cell_size)
     filled = morphology.remove_small_holes(cleaned, area_threshold=max_hole_size)
     smoothed = morphology.binary_closing(filled, morphology.disk(3))
-    return smoothed.astype(bool)
+    # Remove blobs with very low circularity (4π·area/perimeter²)
+    # Real cells are roughly round (circularity > 0.3); spuria artifacts are very irregular
+    labeled = measure.label(smoothed)
+    result = np.zeros_like(smoothed, dtype=bool)
+    for region in measure.regionprops(labeled):
+        if region.perimeter > 0:
+            circularity = (4 * np.pi * region.area) / (region.perimeter ** 2)
+            if circularity >= 0.3:
+                result[labeled == region.label] = True
+    return result
 
 def overlay_boundaries(gray_frame, mask, boundary_color=(255, 255, 0)):
     gray_u8 = img_as_ubyte(np.clip(gray_frame, 0, 1))
@@ -964,6 +973,9 @@ class TrackingPage(QWidget):
 
     def _player_advance(self):
         n = len(self.tracked_frames)
+        if not n:
+            self._player_timer.stop()
+            return
         self._player_idx = (self._player_idx + 1) % n
         self.frame_slider.blockSignals(True)
         self.frame_slider.setValue(self._player_idx)
@@ -1892,7 +1904,7 @@ QMainWindow, QDialog {
 QWidget {
     background-color: transparent;
     color: #dde4f0;
-    font-family: "SF Pro Display", "Inter", "Segoe UI", Arial, sans-serif;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
     font-size: 13px;
 }
 
